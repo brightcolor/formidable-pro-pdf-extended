@@ -33,12 +33,13 @@ class FPPDF_Settings {
 	}
 	
 	private static function run_setting_routing() {
+		$get_nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 		/* 
 		 * Check if we need to redeploy default PDF templates/styles to the theme folder 
 		 */
 		 
-		if( FP_PDF_DEPLOY === true && rgpost('fp_pdf_deploy') && 
-		( wp_verify_nonce($_POST['fp_pdf_deploy_nonce'],'fp_pdf_deploy_nonce_action') || wp_verify_nonce($_GET['_wpnonce'],'pdf-extended-filesystem') ) ) {				
+		if( FP_PDF_DEPLOY === true && rgpost('fp_pdf_deploy') &&
+		( ( isset( $_POST['fp_pdf_deploy_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['fp_pdf_deploy_nonce'] ) ), 'fp_pdf_deploy_nonce_action' ) ) || ( ! empty( $get_nonce ) && wp_verify_nonce( $get_nonce, 'pdf-extended-filesystem' ) ) ) ) {
 			if(rgpost('upgrade'))
 			{
 				/* 
@@ -46,7 +47,7 @@ class FPPDF_Settings {
 				 * If we get false returned Wordpress is trying to get 
 				 * access details to update files so don't display anything.
 				 */
-				if(self::deploy() === false)
+				if(FPPDF_InstallUpdater::pdf_extended_activate() === false)
 				{
 					return true;
 				}
@@ -65,12 +66,12 @@ class FPPDF_Settings {
 		 * If the user hasn't requested deployment and there is a _wpnonce check which one it is 
 		 * and call appropriate function
 		 */	
-		 if(isset($_GET['_wpnonce']))
+		 if( ! empty( $get_nonce ) )
 		 {
 			 /*
 			  * Check if we want to copy the theme files
 			  */
-			 if(wp_verify_nonce($_GET['_wpnonce'], 'fppdfe_sync_now') )
+			 if(wp_verify_nonce($get_nonce, 'fppdfe_sync_now') )
 			 {
 				 $themes = get_option('fppdfe_switch_theme');
 				 
@@ -160,10 +161,11 @@ class FPPDF_Settings {
 	 */
 	public static function ajax_deploy()
 	{		
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
 		/* check nonce and permission */
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'fppdfe_nonce' ) || !current_user_can('frm_edit_forms') )
+		if ( ! wp_verify_nonce( $nonce, 'fppdfe_nonce' ) || !current_user_can('frm_edit_forms') )
 		{
-			print json_encode(array('error' => 'Access denied. Failed to initialise fonts.'));
+			wp_send_json_error( array( 'error' => 'Access denied. Failed to initialise plugin.' ) );
 		}			
 	
 		$results = FPPDF_InstallUpdater::pdf_extended_activate();
@@ -180,12 +182,10 @@ class FPPDF_Settings {
 		 
 		 	ob_end_clean();
 		 	
-			print json_encode(array('error' => $message));
+			wp_send_json_error( array( 'error' => $message ) );
 		} else {
-			print json_encode( array( 'message' => self::pdf_deploy_success() ) );
+			wp_send_json_success( array( 'message' => self::pdf_deploy_success() ) );
 		}
-		
-		exit;
 	}
 	
 	public static function pdf_deploy_success() {
@@ -197,11 +197,12 @@ class FPPDF_Settings {
 	}
 	
 	public static function initialise_fonts() {
+			$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
 		
 			/* check nonce and permission */
-			if ( ! wp_verify_nonce( $_POST['nonce'], 'fppdfe_nonce' ) || !current_user_can('frm_edit_forms') )
+			if ( ! wp_verify_nonce( $nonce, 'fppdfe_nonce' ) || !current_user_can('frm_edit_forms') )
 			{
-				print json_encode(array('error' => 'Access denied. Failed to initialise fonts.'));
+				wp_send_json_error( array( 'error' => 'Access denied. Failed to initialise fonts.' ) );
 			}				
 		
 			/*
@@ -219,8 +220,6 @@ class FPPDF_Settings {
 		 
 			ob_end_clean();
 			
-			print json_encode(array('message' => $message));				 		
-			
-			exit;
+			wp_send_json_success( array( 'message' => $message ) );
 	}
 }

@@ -1,10 +1,11 @@
 === Plugin Name ===
-Contributors: blueliquiddesigns
-Donate link: http://www.formidablepropdfextended.com
+Contributors: brightcolor
+Donate link: https://github.com/brightcolor/formidable-pro-pdf-extended
 Tags: formidable, pro, pdf, extended, automation, attachment
-Requires at least: 3.9
-Tested up to: 3.9.1
-Stable tag: 1.5.4
+Requires at least: 6.3
+Tested up to: 6.9
+Requires PHP: 7.4
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,7 +46,7 @@ Along with the above features, the PDF features include:
 
 **Server Requirements**
 
-1. PHP 5+
+1. PHP 7.4+
 2. MB String
 3. GD Library (optional)
 4. RAM:	Recommended: 128MB. Minimum: 64MB.
@@ -53,8 +54,8 @@ Along with the above features, the PDF features include:
 **Software Requirements**
 
 1. [Purchase and install Formidable Pro](http://formidablepro.com/index.php?plugin=wafp&controller=links&action=redirect&l=formidable-pro&a=blue%20liquid%20designs)
-2. Wordpress 3.6+
-3. Formidable Pro 1.07.01+
+2. Wordpress 6.3+
+3. Formidable Pro 6.0+
 
 **Documentation and Support**
 
@@ -78,6 +79,15 @@ All FAQs can be [viewed on the Formidable Pro PDF Extended website](http://formi
 #2. View or download the PDF from a Formidable Pro entry.
 
 == Changelog ==
+
+= 1.6.0 =
+* Security hardening for public PDF request parameters and nonce handling
+* Converted SQL checks to properly prepared queries
+* Fixed notification flow returning undefined variable when no config exists
+* Fixed multi-template index resolution in configuration lookup
+* Replaced legacy header redirect with wp_safe_redirect()
+* Modernized AJAX responses with wp_send_json_success()/wp_send_json_error()
+* Updated compatibility metadata for current WordPress, Formidable, and PHP baselines
 
 = 1.5.4 =
 * Fixed up initialisation over FTP/SSH

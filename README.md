@@ -1,17 +1,38 @@
-Formidable Pro PDF Extended
-==========================
+# Formidable Pro PDF Extended
 
-**This software is no longer actively maintained or supported.** [Help keep the project alive](http://formidablepropdfextended.com/keep-the-project-alive/).
+Modernized community fork of the original Formidable Pro PDF Extended plugin.
 
-Formidable Pro PDF Extended is a Wordpress plugin that allows you to save/view/download a PDF from the front- and back-end, and automate PDF creation on form submission. 
+This plugin allows you to generate, view, download, and attach PDFs for Formidable Forms entries.
 
-Find out more at [http://formidablepropdfextended.com/](http://formidablepropdfextended.com/).
+## Compatibility
 
+- WordPress: `6.3+`
+- Formidable Forms / Formidable Pro: `6.x`
+- PHP: `7.4+` (tested with modern PHP 8.x environments)
 
-# Documentation
+## What's New in 1.6.0
 
-All documentation can be found at [http://formidablepropdfextended.com/](http://formidablepropdfextended.com/documentation/).
+- Security hardening for public PDF routes (`fid`, `lid`, `template`, `nonce`).
+- Safer SQL queries with proper prepared placeholders.
+- Fixed notification attachment flow edge case that could return an undefined variable.
+- Improved template index resolution for multi-template forms.
+- Replaced legacy redirect handling with `wp_safe_redirect()`.
+- Improved AJAX handlers to use `wp_send_json_success()` / `wp_send_json_error()`.
+- Updated plugin metadata and current support baseline.
+- Refreshed WordPress readme/changelog information.
 
-Note: the software is currently in beta. This should not be used in a production environment.
+## Installation
 
-# Pull Requests Welcome
+1. Upload and activate the plugin.
+2. Open Formidable settings and initialize the plugin files.
+3. Configure your PDF template mapping.
+4. Test PDF generation from an entry and from notifications.
+
+## Upgrade Notes
+
+- If you are upgrading from very old releases, re-run plugin initialization once after update.
+- Review custom templates in your active theme's `FORMIDABLE_PDF_TEMPLATES` folder.
+
+## Changelog
+
+Full release notes are in [`CHANGELOG.md`](./CHANGELOG.md).

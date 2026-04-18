@@ -24,7 +24,7 @@ class FPPDFRender
 		/*
 		 * Set user-variable to output HTML instead of PDF
 		 */		
-		 $html = (isset($_GET['html'])) ? (int) $_GET['html'] : 0;
+		 $html = isset( $_GET['html'] ) ? absint( wp_unslash( $_GET['html'] ) ) : 0;
 
 		/*
 		 * Join the form and lead IDs together to get the real ID
@@ -138,15 +138,15 @@ class FPPDFRender
 		 {
 			 if(FP_PDF_ENABLE_MPDF_TINY === true)
 			 {
-					include FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-extra-lite.php';			 
+					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-extra-lite.php';
 			 }
 			 elseif(FP_PDF_ENABLE_MPDF_LITE === true)
 			 {
-					include FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-lite.php';			 
+					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-lite.php';
 			 }
 			 else
 			 {	 		
-					include FP_PDF_PLUGIN_DIR .'/mPDF/mpdf.php';
+					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf.php';
 			 }
 		 }
 		
@@ -249,7 +249,7 @@ class FPPDFRender
 			break;
 			
 			case 'view':
-				 $mpdf->Output(time(), 'I');
+				 $mpdf->Output($filename, 'I');
 				 exit;
 			break;
 			
@@ -274,7 +274,7 @@ class FPPDFRender
 		/* create unique folder for PDFs */
 		if(!is_dir(FP_PDF_SAVE_LOCATION.$id))
 		{
-			if(!mkdir(FP_PDF_SAVE_LOCATION.$id))
+			if(!wp_mkdir_p(FP_PDF_SAVE_LOCATION.$id))
 			{
 				trigger_error('Could not create PDF folder in '. FP_PDF_SAVE_LOCATION.$id, E_USER_WARNING);				
 				return;
@@ -283,7 +283,7 @@ class FPPDFRender
 		
 		$pdf_save = FP_PDF_SAVE_LOCATION.$id.'/'. $filename;			
 				
-		if(!file_put_contents($pdf_save, $pdf))
+		if(file_put_contents($pdf_save, $pdf, LOCK_EX) === false)
 		{
 			trigger_error('Could not save PDF to '. $pdf_save, E_USER_WARNING);
 			return;

@@ -2,11 +2,11 @@
 
 /*
 Plugin Name: Formidable Pro PDF Extended
-Plugin URI: http://www.formidablepropdfextended.com
+Plugin URI: https://github.com/brightcolor/formidable-pro-pdf-extended
 Description: Formidable Pro PDF Extended allows you to save/view/download a PDF from the front- and back-end, and automate PDF creation on form submission. Our Business Plus package also allows you to overlay field onto an existing PDF.
-Version: 1.5.4
-Author: Blue Liquid Designs
-Author URI: http://www.blueliquiddesigns.com.au
+Version: 1.6.0
+Author: Bright Color
+Author URI: https://github.com/brightcolor
 Text Domain: ffpdf
 
 ------------------------------------------------------------------------
@@ -26,7 +26,7 @@ GNU General Public License for more details.
  * As PDFs can't be generated if notices are displaying turn off error reporting to the screen.
  * Production servers should already have this done.
  */
- if(WP_DEBUG !== true)
+ if ( defined( 'WP_DEBUG' ) && WP_DEBUG !== true )
  {
  	error_reporting(0);
  }
@@ -34,11 +34,11 @@ GNU General Public License for more details.
 	/*
 	* Define our constants
 	*/
-	if(!defined('FP_PDF_EXTENDED_VERSION')) { define('FP_PDF_EXTENDED_VERSION', '1.5.4'); }
+	if(!defined('FP_PDF_EXTENDED_VERSION')) { define('FP_PDF_EXTENDED_VERSION', '1.6.0'); }
 	if ( ! defined('FP_PDF_EXTENDED_SUPPORTED_VERSION') ) {
-		define( 'FP_PDF_EXTENDED_SUPPORTED_VERSION', '1.07.01' );
+		define( 'FP_PDF_EXTENDED_SUPPORTED_VERSION', '6.0' );
 	}
-	if(!defined('FP_PDF_EXTENDED_WP_SUPPORTED_VERSION')) { define('FP_PDF_EXTENDED_WP_SUPPORTED_VERSION', '3.6'); }
+	if(!defined('FP_PDF_EXTENDED_WP_SUPPORTED_VERSION')) { define('FP_PDF_EXTENDED_WP_SUPPORTED_VERSION', '6.3'); }
 
 	if(!defined('FP_PDF_PLUGIN_DIR')) { define('FP_PDF_PLUGIN_DIR', plugin_dir_path( __FILE__ )); }
 	if(!defined('FP_PDF_PLUGIN_URL')) { define('FP_PDF_PLUGIN_URL', plugin_dir_url( __FILE__ )); }
@@ -58,14 +58,14 @@ GNU General Public License for more details.
 	/*
 	* Include the core files
 	*/
-	include FP_PDF_PLUGIN_DIR . 'compatibility.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-common.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-configuration-indexer.php';
-	include FP_PDF_PLUGIN_DIR . 'installation-update-manager.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-render.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-settings.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-entry-detail.php';
-	include FP_PDF_PLUGIN_DIR . 'pdf-custom-display.php';
+	require_once FP_PDF_PLUGIN_DIR . 'compatibility.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-common.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-configuration-indexer.php';
+	require_once FP_PDF_PLUGIN_DIR . 'installation-update-manager.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-render.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-settings.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-entry-detail.php';
+	require_once FP_PDF_PLUGIN_DIR . 'pdf-custom-display.php';
 
 	/*
 	* Initiate the class after Formidable Pro has been loaded using the init hook.
@@ -226,7 +226,7 @@ class FPPDF_Core extends FPPDFGenerator
 			update_option('fp_pdf_extended_deploy', 'no');
 			update_option('fp_pdf_extended_version', FP_PDF_EXTENDED_VERSION);
 			/* redirect */
-			Header('Location: '.FP_PDF_SETTINGS_URL);
+			wp_safe_redirect( FP_PDF_SETTINGS_URL );
 			exit;
 		}
 
@@ -292,11 +292,20 @@ class FPPDF_Core extends FPPDFGenerator
 							?>
                             <div class="detailed_pdf">
 								<span><?php
-									echo $name;
-									$url = home_url() .'/?pdf=1&aid='. $aid .'&fid=' . $form_id . '&lid=' . $lead_id . '&template=' . $val['template'];
+									echo esc_html( $name );
+									$url = add_query_arg(
+										array(
+											'pdf'      => 1,
+											'aid'      => $aid,
+											'fid'      => $form_id,
+											'lid'      => $lead_id,
+											'template' => $val['template'],
+										),
+										home_url( '/' )
+									);
 								?></span>
-                                <a href="<?php echo $url; ?>" target="_blank" class="button">View</a>
-				 				<a href="<?php echo $url.'&download=1'; ?>" target="_blank" class="button">Download</a></div>
+                                <a href="<?php echo esc_url( $url ); ?>" target="_blank" class="button">View</a>
+                                <a href="<?php echo esc_url( add_query_arg( 'download', 1, $url ) ); ?>" target="_blank" class="button">Download</a></div>
 
                             <?php endforeach; ?>
 
@@ -305,11 +314,19 @@ class FPPDF_Core extends FPPDFGenerator
 		}
 		elseif($templates !== false)
 		{
-			$url = home_url() .'/?pdf=1&fid=' . $form_id . '&lid=' . $lead_id . '&template=' . $templates;
+			$url = add_query_arg(
+				array(
+					'pdf'      => 1,
+					'fid'      => $form_id,
+					'lid'      => $lead_id,
+					'template' => $templates,
+				),
+				home_url( '/' )
+			);
 
 			?>
-			PDF: <a href="<?php echo $url; ?>" target="_blank" class="button">View</a>
-				 <a href="<?php echo $url.'&download=1'; ?>" onclick="var url='<?php echo $url.'&download=1'; ?>'; window.open (url); return false;" class="button">Download</a>
+			PDF: <a href="<?php echo esc_url( $url ); ?>" target="_blank" class="button">View</a>
+				 <a href="<?php echo esc_url( add_query_arg( 'download', 1, $url ) ); ?>" onclick="var url='<?php echo esc_js( add_query_arg( 'download', 1, $url ) ); ?>'; window.open (url); return false;" class="button">Download</a>
 			<?php
 		}
 		?>
@@ -351,7 +368,7 @@ class FPPDF_Core extends FPPDFGenerator
 							 $aid = (int) $id + 1;
 							?>
                             <li class="">
-                            	<a target="_blank" href="<?php echo home_url(); ?>/?pdf=1&aid=<?php echo $aid; ?>&fid=<?php echo $form_id; ?>&lid=<?php echo $lead_id; ?>&template=<?php echo $t['template']; ?>"><?php echo $name; ?></a>
+                                <a target="_blank" href="<?php echo esc_url( add_query_arg( array( 'pdf' => 1, 'aid' => $aid, 'fid' => $form_id, 'lid' => $lead_id, 'template' => $t['template'] ), home_url( '/' ) ) ); ?>"><?php echo esc_html( $name ); ?></a>
                             </li>
                             <?php endforeach; ?>
                         </ul>
@@ -368,7 +385,7 @@ class FPPDF_Core extends FPPDFGenerator
 
 			ob_start();
 			?>
-			<a target="_blank" href="<?php echo home_url(); ?>/?pdf=1&fid=<?php echo $form_id; ?>&lid=<?php echo $lead_id; ?>&template=<?php echo $templates; ?>"> View PDF</a>
+			<a target="_blank" href="<?php echo esc_url( add_query_arg( array( 'pdf' => 1, 'fid' => $form_id, 'lid' => $lead_id, 'template' => $templates ), home_url( '/' ) ) ); ?>"> View PDF</a>
 			<?php
 			$actions['pdf'] = ob_get_contents();
 			ob_end_clean();
@@ -392,9 +409,15 @@ class FPPDF_Core extends FPPDFGenerator
 		return;
 	  }
 
-		$form_id = (int) $_GET['fid'];
-		$lead_id = (int) $_GET['lid'];
+		$form_id = isset( $_GET['fid'] ) ? absint( wp_unslash( $_GET['fid'] ) ) : 0;
+		$lead_id = isset( $_GET['lid'] ) ? absint( wp_unslash( $_GET['lid'] ) ) : 0;
+		if ( $form_id <= 0 || $lead_id <= 0 ) {
+			return;
+		}
+
 		$ip = FPPDF_Common::getRealIpAddr();
+		$nonce = isset( $_GET['nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : '';
+		$user_template = isset( $_GET['template'] ) ? basename( sanitize_file_name( wp_unslash( $_GET['template'] ) ) ) : '';
 
 		/*
 		 * Get the template name
@@ -412,13 +435,20 @@ class FPPDF_Core extends FPPDFGenerator
 		/*
 		 * Run if user is not logged in
 		 */
-		 if(!is_user_logged_in() && empty($_GET['nonce']))
+		 if(!is_user_logged_in() && empty($nonce))
 		 {
 			/*
 			 * Check the lead is in the database and the IP address matches (little security booster)
 			 */
 
-			 $form_entries = $wpdb->get_var( $wpdb->prepare("SELECT count(*) FROM `". $frmdb->entries ."` WHERE form_id = ".$form_id." AND id = ".$lead_id." AND ip = '".$ip."'", array() ) );
+			 $form_entries = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT count(*) FROM `{$frmdb->entries}` WHERE form_id = %d AND id = %d AND ip = %s",
+					$form_id,
+					$lead_id,
+					$ip
+				)
+			 );
 
 			 if($form_entries == 0 && $this->configuration[$index]['access'] !== 'all')
 			 {
@@ -426,16 +456,12 @@ class FPPDF_Core extends FPPDFGenerator
 			 }
 
 		 }
-		 elseif(isset($_GET['nonce']))
+		 elseif(!empty($nonce))
 		 {
 			/*
 			 * Using the custom display, which needs PDFs to be public
 			 * If nonce matches then we will display the results
 			 */
-			 $user_template = $_GET['template'];
-
-			 $nonce = $_GET['nonce'];
-
 			 if ( ! wp_verify_nonce( $nonce,  'fppdf_' . $form_id . $lead_id. $user_template ) ) {
 				 /*
 				  * Failed
@@ -454,7 +480,14 @@ class FPPDF_Core extends FPPDFGenerator
 				   * User doesn't have the correct access privilages
 				   * Let's check if they are assigned to the form
 				   */
-					$user_logged_entries = $wpdb->get_var( $wpdb->prepare("SELECT count(*) FROM `". $frmdb->entries ."` WHERE form_id = ".$form_id." AND id = ".$lead_id." AND user_id = '".get_current_user_id()."'", array() ) );
+					$user_logged_entries = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT count(*) FROM `{$frmdb->entries}` WHERE form_id = %d AND id = %d AND user_id = %d",
+							$form_id,
+							$lead_id,
+							get_current_user_id()
+						)
+					);
 
 					/*
 					 * Failed again.
@@ -464,7 +497,14 @@ class FPPDF_Core extends FPPDFGenerator
 					if($user_logged_entries == 0)
 					{
 
-						$form_entries = $wpdb->get_var( $wpdb->prepare("SELECT count(*) FROM `". $frmdb->entries ."` WHERE form_id = ".$form_id." AND id = ".$lead_id." AND ip = '".$ip."'", array() ) );
+						$form_entries = $wpdb->get_var(
+							$wpdb->prepare(
+								"SELECT count(*) FROM `{$frmdb->entries}` WHERE form_id = %d AND id = %d AND ip = %s",
+								$form_id,
+								$lead_id,
+								$ip
+							)
+						);
 						if($form_entries == 0 && $this->configuration[$index]['access'] !== 'all')
 						{
 							/*
@@ -481,9 +521,9 @@ class FPPDF_Core extends FPPDFGenerator
 			   * we will allow a template to be shown by setting the template variable
 			   */
 
-			   if( (isset($_GET['template'])) && ($template != $_GET['template']) && (substr($_GET['template'], -4) == '.php') )
+			   if( $user_template && $template !== $user_template && (substr($user_template, -4) === '.php') )
 			   {
-					$template = $_GET['template'];
+					$template = $user_template;
 			   }
 
 		 }
@@ -545,7 +585,7 @@ class FPPDF_Core extends FPPDFGenerator
 		 */
 		if(!$config = $fppdf->get_config($form_id))
 		 {
-			 return $notification;
+			 return $attachments;
 		 }
 
 		/*
@@ -591,7 +631,7 @@ class FPPDF_Core extends FPPDFGenerator
 		{
 			foreach($notification_name as $name)
 			{
-				if(in_array($name, $notifications))
+				if(in_array($name, $notifications, true))
 				{
 					return true;
 				}
@@ -599,7 +639,7 @@ class FPPDF_Core extends FPPDFGenerator
 		}
 		else
 		{
-			if(in_array($notification_name, $notifications))
+			if(in_array($notification_name, $notifications, true))
 			{
 				return true;
 			}
@@ -622,9 +662,11 @@ class FPPDF_Core extends FPPDFGenerator
 		/*
 		 * Get this notification id
 		 */
-		$this_notification = $args['email_key'];
-
 		$new_notifications = array();
+		$this_notification = isset( $args['email_key'] ) ? $args['email_key'] : '';
+		if ( $this_notification === '' ) {
+			return $new_notifications;
+		}
 
 		/*
 		 * If notifications is true the user wants to attach the PDF to all notifications
@@ -715,6 +757,7 @@ class FPPDF_Core extends FPPDFGenerator
 	{
 
 		global $fp_pdf_default_configuration, $fppdf;
+		$index = false;
 
 		/*
 		 * Check if configuration index already defined		 
@@ -758,7 +801,7 @@ class FPPDF_Core extends FPPDFGenerator
 				 */
 				 if(isset($_GET['aid']) && (int) $_GET['aid'] > 0)
 				 {
-					$aid = (int) $_GET['aid'] - 1;
+					$aid = absint( wp_unslash( $_GET['aid'] ) ) - 1;
 					if(isset($fppdf->index[$form_id][$aid]))
 					{
 						return $fppdf->index[$form_id][$aid];
@@ -769,13 +812,12 @@ class FPPDF_Core extends FPPDFGenerator
 				 * If aid not present we'll match against the template
 				 * This is usually the case when using a user-generated link
 				 */
-				$index = false;
 				foreach($fppdf->index[$form_id] as $i)
 				{
 					if(isset($fppdf->configuration[$i]['template']) && $fppdf->configuration[$i]['template'] == $template)
 					{
 						/* matched by template */
-						return $fppdf->index[$form_id][$i];	
+						return $i;
 					}
 				}				
 			}
@@ -812,7 +854,11 @@ if (!function_exists('array_replace_recursive'))
 	            if (is_array($value))
 	            {
 	                // Traverse the array; replace or add result to original array
-	                $original[$key] = array_replace_recursive($original[$key], $array[$key]);
+					if ( isset( $original[ $key ] ) && is_array( $original[ $key ] ) ) {
+						$original[$key] = array_replace_recursive($original[$key], $array[$key]);
+					} else {
+						$original[$key] = $array[$key];
+					}
 	            }
 
 	            // Value is not an array

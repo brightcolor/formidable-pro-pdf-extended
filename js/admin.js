@@ -8,6 +8,7 @@
 	
 	function initialise_ajax_success(results)
 	{
+						results = results && results.data ? results.data : results;
 						$('.spinner').remove();		
 									
 						$('.fppdfe_message').slideUp();			
@@ -64,6 +65,7 @@
 	}
 	
 	function font_ajax_success(results) {
+			results = results && results.data ? results.data : results;
 			$('.spinner').remove();	
 			$('.fppdfe_message').slideUp();							
 			/*

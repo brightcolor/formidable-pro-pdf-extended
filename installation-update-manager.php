@@ -456,10 +456,11 @@ class FPPDF_InstallUpdater
 	 */
 	public static function do_theme_switch_notice()
 	{		
+		$get_nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 		/*
 		 * Check we aren't in the middle of doing the sync
 		 */
-		 if(isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'gfpdfe_sync_now'))
+		 if(!empty($get_nonce) && wp_verify_nonce($get_nonce, 'fppdfe_sync_now'))
 		 {
 			return; 
 		 }
