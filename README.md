@@ -10,16 +10,14 @@ This plugin allows you to generate, view, download, and attach PDFs for Formidab
 - Formidable Forms / Formidable Pro: `6.x`
 - PHP: `7.4+` (tested with modern PHP 8.x environments)
 
-## What's New in 1.6.0
+## What's New in 2.0.0
 
-- Security hardening for public PDF routes (`fid`, `lid`, `template`, `nonce`).
-- Safer SQL queries with proper prepared placeholders.
-- Fixed notification attachment flow edge case that could return an undefined variable.
-- Improved template index resolution for multi-template forms.
-- Replaced legacy redirect handling with `wp_safe_redirect()`.
-- Improved AJAX handlers to use `wp_send_json_success()` / `wp_send_json_error()`.
-- Updated plugin metadata and current support baseline.
-- Refreshed WordPress readme/changelog information.
+- Upgraded PDF engine to `mPDF 8.3.1` and modernized runtime loading through bundled `vendor/` dependencies.
+- Migrated renderer from legacy `mPDF` class to namespaced `\Mpdf\Mpdf` API.
+- Comprehensive security hardening pass on request handling and shortcode rendering.
+- Removed unsafe attribute extraction in custom display shortcode parser.
+- Improved sanitization and validation around route/config selection helpers.
+- Continued hardening from `1.6.0` (SQL, nonce flow, redirects, AJAX response handling).
 
 ## Installation
 

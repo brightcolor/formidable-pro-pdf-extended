@@ -19,7 +19,9 @@
 				if(strlen($attr) > 0 && strpos($attr, '=') !== false)
 				{
 					$attr_block = explode('=', $attr);				
-					$attr_return[$attr_block[0]] = str_replace('"', '', str_replace("'", '', $attr_block[1]));
+					$key = sanitize_key( $attr_block[0] );
+					$val = str_replace('"', '', str_replace("'", '', $attr_block[1]));
+					$attr_return[$key] = sanitize_text_field( $val );
 				}
 			}
 			
@@ -47,14 +49,20 @@
 					 */ 
 					 foreach($results[0] as $key => $string)
 					 {
-						$template = $download = $text = false; 
+						$template = '';
+						$download = '';
+						$language = '';
+						$text = '';
 						 
 						/*
 						 * Check if any attributes are avaliable
 						 */ 
 						 if(strlen($results[1][$key]) > 0)
 						 {						
-							extract(self::format_attrs($results[1][$key])); 						
+							$attrs = self::format_attrs($results[1][$key]);
+							$template = isset($attrs['template']) ? basename( sanitize_file_name( $attrs['template'] ) ) : '';
+							$download = isset($attrs['download']) ? $attrs['download'] : '';
+							$language = isset($attrs['language']) ? sanitize_text_field( $attrs['language'] ) : '';
 						 }
 						 
 						 /*
@@ -62,25 +70,23 @@
 						  */ 
 						  if(strlen($results[4][$key]) > 0)
 						  {
-								$text = $results[4][$key];  
+								$text = wp_kses_post( $results[4][$key] );
 						  }
 						 								 
 						 
-						 if($template === false)
+						 if($template === '')
 						 {
 							 global $fppdf;
-							 
-							 /*
-							  * No template used. Get the first template file found in config
-							  */
-							 $all_indexes = $fppdf->check_configuration($form_id);		
-							 $index = $all_indexes[0];
-							 $template = $fppdf->get_template($form_id);									 
+
+							 $template = $fppdf->get_template($form_id);
+							 if ( empty( $template ) || substr( $template, -4 ) !== '.php' ) {
+								$template = FPPDFGenerator::$default['template'];
+							 }
 						 }
 						 
-						 if($text === false)
+						 if($text === '')
 						 {
-							$text = 'View PDF'; 
+							$text = esc_html__( 'View PDF', 'ffpdf' );
 						 }
 						 
 						 $nonce = wp_create_nonce('fppdf_' . $form_id . $lead_id. $template);																 
@@ -88,10 +94,24 @@
 						 /*
 						  * Build URL 
 						  */
-						  $url = '<a href="'. site_url() . '/?pdf=1&fid='.$form_id.'&lid='.$lead_id.'&template='.$template .'&nonce='. $nonce ;
-						  $url .= ($download !== false) ? '&download=1' : '';
-						  $url .= ($language !== false) ? '&lang=' . $language : '';
-						  $url .= '">'. $text . '</a>';
+						  $query = array(
+							'pdf'      => 1,
+							'fid'      => (int) $form_id,
+							'lid'      => (int) $lead_id,
+							'template' => $template,
+							'nonce'    => $nonce,
+						  );
+
+						  if ( $download !== '' && $download !== '0' ) {
+							$query['download'] = 1;
+						  }
+
+						  if ( $language !== '' ) {
+							$query['lang'] = $language;
+						  }
+
+						  $href = add_query_arg( $query, site_url( '/' ) );
+						  $url = '<a href="' . esc_url( $href ) . '">' . $text . '</a>';
 						  
 						  $new_content = str_replace($string, $url, $new_content);
 					 }

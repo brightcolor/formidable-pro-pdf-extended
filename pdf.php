@@ -4,7 +4,7 @@
 Plugin Name: Formidable Pro PDF Extended
 Plugin URI: https://github.com/brightcolor/formidable-pro-pdf-extended
 Description: Formidable Pro PDF Extended allows you to save/view/download a PDF from the front- and back-end, and automate PDF creation on form submission. Our Business Plus package also allows you to overlay field onto an existing PDF.
-Version: 1.6.0
+Version: 2.0.0
 Author: Bright Color
 Author URI: https://github.com/brightcolor
 Text Domain: ffpdf
@@ -34,7 +34,7 @@ GNU General Public License for more details.
 	/*
 	* Define our constants
 	*/
-	if(!defined('FP_PDF_EXTENDED_VERSION')) { define('FP_PDF_EXTENDED_VERSION', '1.6.0'); }
+	if(!defined('FP_PDF_EXTENDED_VERSION')) { define('FP_PDF_EXTENDED_VERSION', '2.0.0'); }
 	if ( ! defined('FP_PDF_EXTENDED_SUPPORTED_VERSION') ) {
 		define( 'FP_PDF_EXTENDED_SUPPORTED_VERSION', '6.0' );
 	}
@@ -42,6 +42,9 @@ GNU General Public License for more details.
 
 	if(!defined('FP_PDF_PLUGIN_DIR')) { define('FP_PDF_PLUGIN_DIR', plugin_dir_path( __FILE__ )); }
 	if(!defined('FP_PDF_PLUGIN_URL')) { define('FP_PDF_PLUGIN_URL', plugin_dir_url( __FILE__ )); }
+	if(!defined('FP_PDF_VENDOR_DIR')) { define('FP_PDF_VENDOR_DIR', FP_PDF_PLUGIN_DIR . 'vendor/'); }
+	if(!defined('FP_PDF_VENDOR_AUTOLOAD')) { define('FP_PDF_VENDOR_AUTOLOAD', FP_PDF_VENDOR_DIR . 'autoload.php'); }
+	if(!defined('FP_PDF_MPDF_TTFONT_LOCATION')) { define('FP_PDF_MPDF_TTFONT_LOCATION', FP_PDF_VENDOR_DIR . 'mpdf/mpdf/ttfonts/'); }
 	if(!defined('FP_PDF_SETTINGS_URL')) { define("FP_PDF_SETTINGS_URL", site_url() .'/wp-admin/admin.php?page=formidable-settings#PDF_settings'); }
 	if(!defined('FP_PDF_SAVE_FOLDER')) { define('FP_PDF_SAVE_FOLDER', 'FORMIDABLE_PDF_TEMPLATES'); }
 	if(!defined('FP_PDF_SAVE_LOCATION')) { define('FP_PDF_SAVE_LOCATION', get_stylesheet_directory().'/'.FP_PDF_SAVE_FOLDER.'/output/'); }
@@ -58,6 +61,9 @@ GNU General Public License for more details.
 	/*
 	* Include the core files
 	*/
+	if ( file_exists( FP_PDF_VENDOR_AUTOLOAD ) ) {
+		require_once FP_PDF_VENDOR_AUTOLOAD;
+	}
 	require_once FP_PDF_PLUGIN_DIR . 'compatibility.php';
 	require_once FP_PDF_PLUGIN_DIR . 'pdf-common.php';
 	require_once FP_PDF_PLUGIN_DIR . 'pdf-configuration-indexer.php';
@@ -245,7 +251,7 @@ class FPPDF_Core extends FPPDFGenerator
 			/**
 			 * Check if deployed new template files after update
 			 */
-			 if( (get_option('FP_PDF_extended_deploy') == 'no' && !rgpost('upgrade') && FP_PDF_DEPLOY === true) || (file_exists(FP_PDF_PLUGIN_DIR .'mPDF.zip') && !rgpost('upgrade') ) ) {
+			 if( (get_option('FP_PDF_extended_deploy') == 'no' && !rgpost('upgrade') && FP_PDF_DEPLOY === true) ) {
 				/*show warning message */
 				add_action('admin_notices', array("FPPDF_InstallUpdater", "FP_PDF_not_deployed"));
 			 }
@@ -799,7 +805,7 @@ class FPPDF_Core extends FPPDFGenerator
 				/*
 				 * Check if $_GET['aid'] present which will give us the index when multi templates assigned
 				 */
-				 if(isset($_GET['aid']) && (int) $_GET['aid'] > 0)
+				 if(isset($_GET['aid']) && absint( wp_unslash( $_GET['aid'] ) ) > 0)
 				 {
 					$aid = absint( wp_unslash( $_GET['aid'] ) ) - 1;
 					if(isset($fppdf->index[$form_id][$aid]))

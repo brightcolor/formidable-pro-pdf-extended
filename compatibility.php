@@ -9,7 +9,7 @@
 	{
 		if(isset($_POST[$key]))
 		{
-			return $_POST[$key];	
+			return wp_unslash($_POST[$key]);
 		}
 		return '';
 	}
@@ -21,7 +21,7 @@
 	{
 		if(isset($_GET[$key]))
 		{
-			return $_GET[$key];	
+			return wp_unslash($_GET[$key]);
 		}
 		return '';
 	}
@@ -35,7 +35,7 @@
 		{
 			return true;	
 		}
-		elseif(strlen($array[$key]) == 0)
+		elseif(is_scalar($array[$key]) && strlen((string) $array[$key]) == 0)
 		{
 			return true;	
 		}

@@ -129,44 +129,50 @@ class FPPDFRender
 	 */
 	public function PDF_processing($html, $filename, $id, $output = 'view', $arguments)
 	{
-		/* 
-		 * DOMPDF replaced with mPDF in v3.0.0 
-		 * Check which version of mpdf we are calling
-		 * Full, Lite or Tiny
-		 */
-		 if(!class_exists('mPDF'))
-		 {
-			 if(FP_PDF_ENABLE_MPDF_TINY === true)
-			 {
-					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-extra-lite.php';
-			 }
-			 elseif(FP_PDF_ENABLE_MPDF_LITE === true)
-			 {
-					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf-lite.php';
-			 }
-			 else
-			 {	 		
-					require_once FP_PDF_PLUGIN_DIR .'/mPDF/mpdf.php';
-			 }
-		 }
+		if ( ! class_exists( '\\Mpdf\\Mpdf' ) && file_exists( FP_PDF_VENDOR_AUTOLOAD ) ) {
+			require_once FP_PDF_VENDOR_AUTOLOAD;
+		}
+
+		if ( ! class_exists( '\\Mpdf\\Mpdf' ) ) {
+			trigger_error( 'mPDF runtime not available. Ensure vendor dependencies are installed.', E_USER_WARNING );
+			return false;
+		}
 		
 		/* 
 		 * Initialise class and set the paper size and orientation
 		 */
-		 $paper_size = $arguments['pdf_size'];
-		
-		 
-		 if(!is_array($paper_size))
-		 {
-			 $orientation = ($arguments['orientation'] == 'landscape') ? '-L' : '';
-			 $paper_size = $paper_size.$orientation;
-		 }
-		 else
-		 {
-		 	$orientation = ($arguments['orientation'] == 'landscape') ? 'L' : 'P';			 			
-		 }
-		 
-		 $mpdf = new mPDF('', $paper_size, 0, '', 15, 15, 16, 16, 9, 9, $orientation);
+		$paper_size  = $arguments['pdf_size'];
+		$orientation = ($arguments['orientation'] === 'landscape') ? 'L' : 'P';
+		$temp_dir    = trailingslashit( FP_PDF_SAVE_LOCATION ) . 'tmp/';
+
+		if ( ! is_dir( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
+		}
+
+		$mpdf_config = array(
+			'mode'          => 'utf-8',
+			'orientation'   => $orientation,
+			'margin_left'   => 15,
+			'margin_right'  => 15,
+			'margin_top'    => 16,
+			'margin_bottom' => 16,
+			'margin_header' => 9,
+			'margin_footer' => 9,
+			'tempDir'       => $temp_dir,
+		);
+
+		if ( is_array( $paper_size ) && isset( $paper_size[0], $paper_size[1] ) ) {
+			$mpdf_config['format'] = array( (float) $paper_size[0], (float) $paper_size[1] );
+		} else {
+			$mpdf_config['format'] = strtoupper( (string) $paper_size );
+		}
+
+		try {
+			$mpdf = new \Mpdf\Mpdf( $mpdf_config );
+		} catch ( \Mpdf\MpdfException $e ) {
+			trigger_error( 'mPDF failed to initialize: ' . $e->getMessage(), E_USER_WARNING );
+			return false;
+		}
 		
 		/*
 		 * Display PDF is full-page mode which allows the entire PDF page to be viewed
@@ -180,15 +186,14 @@ class FPPDFRender
 		}
 		
 		/*
-		 * Automatically detect fonts and substitue as needed
+		 * Font substitution toggle.
 		 */
-		if(FP_PDF_DISABLE_FONT_SUBSTITUTION === true)
+		if(defined('FP_PDF_DISABLE_FONT_SUBSTITUTION') && FP_PDF_DISABLE_FONT_SUBSTITUTION === true)
 		{
 			$mpdf->useSubstitutions = false;		
 		}	
 		else
-		{	 
-			$mpdf->SetAutoFont(AUTOFONT_ALL);
+		{
 			$mpdf->useSubstitutions = true;
 		}
 		
@@ -196,7 +201,7 @@ class FPPDFRender
 		 * Set Creator Meta Data
 		 */
 		
-		$mpdf->SetCreator('Formidable Pro PDF Extended v'. FP_PDF_EXTENDED_VERSION.'. http://formidablepropdfextended.com');	
+		$mpdf->SetCreator('Formidable Pro PDF Extended v'. FP_PDF_EXTENDED_VERSION.'. https://github.com/brightcolor/formidable-pro-pdf-extended');
 
 		/*
 		 * Set RTL languages at user request
@@ -244,12 +249,12 @@ class FPPDFRender
 		switch($output)
 		{
 			case 'download':
-				 $mpdf->Output($filename, 'D');
+				 $mpdf->Output($filename, \Mpdf\Output\Destination::DOWNLOAD);
 				 exit;
 			break;
 			
 			case 'view':
-				 $mpdf->Output($filename, 'I');
+				 $mpdf->Output($filename, \Mpdf\Output\Destination::INLINE);
 				 exit;
 			break;
 			
@@ -258,7 +263,7 @@ class FPPDFRender
 				 * PDF wasn't writing to file with the F method - http://mpdf1.com/manual/index.php?tid=125
 				 * Return as a string and write to file manually
 				 */					
-				$pdf = $mpdf->Output('', 'S');
+				$pdf = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
 				return $this->savePDF($pdf, $filename, $id);				 
 			break;
 		}

@@ -305,10 +305,10 @@
  define('FPPDF_SET_DEFAULT_TEMPLATE', true); 
  
  /*
-  * MEMORY ISSUES?
-  * Try setting the options below to true to help reduce the memory footprint of the package.
-  */ 
- define('FP_PDF_ENABLE_MPDF_LITE', true); /* strip out advanced features like advanced table borders, terms and conditions, columns, index, bookmarks and barcodes. */
- define('FP_PDF_ENABLE_MPDF_TINY', false); /* if your tried the lite version and are still having trouble the tiny version includes the bare minimum features. There's no positioning, float, watermark or form support */
- define('FP_PDF_DISABLE_FONT_SUBSTITUTION', false); /* reduced memory by stopping font substitution */
- define('FP_PDF_ENABLE_SIMPLE_TABLES', false); /* disable the advanced table feature and forces all cells to have the same border, background etc. */
+  * RUNTIME OPTIONS
+  * mPDF now uses the modern Composer-based runtime. Legacy lite/tiny build flags are deprecated.
+  */
+ define('FP_PDF_ENABLE_MPDF_LITE', false); /* Deprecated: no effect in modern runtime */
+ define('FP_PDF_ENABLE_MPDF_TINY', false); /* Deprecated: no effect in modern runtime */
+ define('FP_PDF_DISABLE_FONT_SUBSTITUTION', false);
+ define('FP_PDF_ENABLE_SIMPLE_TABLES', false);

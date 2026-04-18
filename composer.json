@@ -1,0 +1,9 @@
+{
+  "name": "brightcolor/formidable-pro-pdf-extended",
+  "description": "Formidable Pro PDF Extended plugin with modern mPDF runtime",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "mpdf/mpdf": "^8.3"
+  }
+}

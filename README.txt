@@ -5,7 +5,7 @@ Tags: formidable, pro, pdf, extended, automation, attachment
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ All FAQs can be [viewed on the Formidable Pro PDF Extended website](http://formi
 #2. View or download the PDF from a Formidable Pro entry.
 
 == Changelog ==
+
+= 2.0.0 =
+* Upgraded bundled PDF engine to mPDF 8.3.1 (modern vendor runtime)
+* Added bundled vendor dependencies for mPDF ecosystem packages
+* Migrated renderer to namespaced mPDF 8 API and modern output destinations
+* Hardened shortcode PDF link generation and removed unsafe extract() usage
+* Improved request input sanitization across routing/config selection helpers
+* Improved IP parsing and validation for entry access checks
+* Updated installer checks for modern vendor-based runtime
+* Deprecated legacy mPDF lite/tiny runtime toggles
 
 = 1.6.0 =
 * Security hardening for public PDF request parameters and nonce handling

@@ -147,11 +147,11 @@ class FPPDF_Settings {
                </div>
 
                <div class="rightcolumn">
-               		<h2>Welcome to Formidable Pro PDF Extended Beta!</h2>
+                    <h2>Formidable Pro PDF Extended</h2>
                     
-                    <p>Your one of the very first to try Formidable Pro PDF Extended but keep in mind, with great power comes great responsibility... This software may contain bugs that weren't picked up during initial development (which is why we are having an open beta). It <strong>should not be used on a production server</strong>.</p>
+                    <p>This release uses a modernized PDF runtime and hardened request handling. After each update, re-initialise the plugin and verify your custom templates.</p>
                     
-                    <p>If you have any issues using the software, find a bug or have an idea to make the plugin even better then please <a href="http://formidablepropdfextended.com/support/formidable-pro-pdf-extended/beta-feedbackbug-reports/">head to our support forum</a> and start a new topic. If you don't report it then we can't fix it! </p>
+                    <p>Project repository: <a href="https://github.com/brightcolor/formidable-pro-pdf-extended" target="_blank" rel="noopener noreferrer">github.com/brightcolor/formidable-pro-pdf-extended</a></p>
                </div>
         <?php
 	}

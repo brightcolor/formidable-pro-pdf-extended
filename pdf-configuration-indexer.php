@@ -164,10 +164,12 @@
 		 * If 'aid' is not found we will pull the first entry
 		 * Note: 'aid' has been incremented by 1 so 'aid' === 0 is never found
 		 */
-		 if(isset($_GET['aid']) && (int) $_GET['aid'] > 0)
+		 if(isset($_GET['aid']) && absint( wp_unslash( $_GET['aid'] ) ) > 0)
 		 {
-			$aid = (int) $_GET['aid'] - 1;
-			return $this->configuration[$index[$aid]]; 
+			$aid = absint( wp_unslash( $_GET['aid'] ) ) - 1;
+			if ( isset( $index[$aid] ) ) {
+				return $this->configuration[$index[$aid]];
+			}
 		 }
 		 
 		 /*
@@ -196,10 +198,12 @@
 		 * If 'aid' is not found we will pull the first entry
 		 * Note: 'aid' has been incremented by 1 so 'aid' === 0 is never found
 		 */
-		 if(isset($_GET['aid']) && (int) $_GET['aid'] > 0)
+		 if(isset($_GET['aid']) && absint( wp_unslash( $_GET['aid'] ) ) > 0)
 		 {
-			$aid = (int) $_GET['aid'] - 1;
-			return $this->configuration[$index[$aid]]; 
+			$aid = absint( wp_unslash( $_GET['aid'] ) ) - 1;
+			if ( isset( $index[$aid] ) ) {
+				return $this->configuration[$index[$aid]];
+			}
 		 }
 		 
 		 /*
@@ -253,7 +257,7 @@
 			 */ 
 			 if(isset($this->configuration[$this->index[$form_id][0]]['template']))
 			 {
-					$user_template = (isset($_GET['template'])) ? $_GET['template'] : '';
+					$user_template = (isset($_GET['template'])) ? basename( sanitize_file_name( wp_unslash( $_GET['template'] ) ) ) : '';
 					$match = false;
 
 					foreach($this->index[$form_id] as $index)

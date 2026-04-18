@@ -65,7 +65,7 @@ class FPPDF_Common
 			return false; 
 		 }
 		 
-		 if(file_exists(FP_PDF_PLUGIN_DIR .'mPDF.zip'))
+		 if(!file_exists(FP_PDF_VENDOR_DIR . 'mpdf/mpdf/src/Mpdf.php'))
 		 {
 			return false; 
 		 }
@@ -75,19 +75,21 @@ class FPPDF_Common
 	
 	public static function getRealIpAddr()
 	{
-		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-		{
-		  $ip = $_SERVER['HTTP_CLIENT_IP'];
+		$ip = '';
+		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$forwarded = explode( ',', wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+			$ip = trim( $forwarded[0] );
+		} elseif ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+			$ip = trim( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
+		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = trim( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
-		else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-		{
-		  $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+
+		if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return $ip;
 		}
-		else
-		{
-		  $ip = $_SERVER['REMOTE_ADDR'];
-		}
-		return $ip;
+
+		return '0.0.0.0';
 	}
 	
 	public static function get_html_template($filename) 
@@ -112,27 +114,11 @@ class FPPDF_Common
 	}
 	
 	/*
-	* Check if mPDF folder exists.
-	* If so, unzip and delete
-	* Helps reduce the package file size
+	* Legacy no-op for backward compatibility.
 	*/		
 	public static function unpack_mPDF()
 	{
-		$file = FP_PDF_PLUGIN_DIR .'mPDF.zip';
-		$path = pathinfo(realpath($file), PATHINFO_DIRNAME);
-		
-		if(file_exists($file))
-		{
-			/* unzip folder and delete */
-			$zip = new ZipArchive;
-			$res = $zip->open($file);
-			
-			if ($res === TRUE) {
-  				$zip->extractTo($path);
-			    $zip->close();	
-				unlink($file);
-			}
-		}
+		return;
 	}	
 	
 	/*
@@ -199,7 +185,7 @@ class FPPDF_Common
 	
 	public static function view_data($form_data)
 	{
-		if(isset($_GET['data']) && $_GET['data'] === '1')
+		if(isset($_GET['data']) && absint( wp_unslash( $_GET['data'] ) ) === 1)
 		{
 			print '<pre>'; 
 			print_r($form_data);

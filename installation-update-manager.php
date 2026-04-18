@@ -94,25 +94,11 @@ class FPPDF_InstallUpdater
 		 }
 		 
 
-		/* unzip the mPDF file */
-		if($wp_filesystem->exists(self::$directory . 'mPDF.zip'))
-		{
-			/*
-			 * The only function that requires the input to be the full path and the export to be the directory used in $wp_filesystem
-			 */
-			$results = unzip_file( FP_PDF_PLUGIN_DIR . 'mPDF.zip', self::$directory );
-		
-			if($results !== true)
-			{						
-				add_action('fppdfe_notices', array("FPPDF_InstallUpdater", "fp_pdf_unzip_mpdf_err")); 	
-				return 'fail';				
-			}			
-
-			/*
-			 * Remove the original archive
-			 */
-			 $wp_filesystem->delete(self::$directory . 'mPDF.zip');
-		}	
+		/* Check modern mPDF runtime is present */
+		if ( ! $wp_filesystem->exists( self::$directory . 'vendor/mpdf/mpdf/src/Mpdf.php' ) ) {
+			add_action('fppdfe_notices', array("FPPDF_InstallUpdater", "fp_pdf_unzip_mpdf_err"));
+			return 'fail';
+		}
 
 		/* create new directory in active themes folder*/	
 		if(!$wp_filesystem->is_dir(self::$template_directory))
@@ -248,12 +234,12 @@ class FPPDF_InstallUpdater
 				/*
 				 * Check if the files already exist in the mPDF font folder
 				 */					
-				 if(!$wp_filesystem->exists($directory . 'mPDF/ttfonts/' . $path_parts['basename']))
+				 if(!$wp_filesystem->exists($directory . 'vendor/mpdf/mpdf/ttfonts/' . $path_parts['basename']))
 				 {
 					/*
 					 * copy ttf file to the mPDF font folder
 					 */
-					if($wp_filesystem->copy($file, $directory . 'mPDF/ttfonts/' . $path_parts['basename']) === false)
+					if($wp_filesystem->copy($file, $directory . 'vendor/mpdf/mpdf/ttfonts/' . $path_parts['basename']) === false)
 					{ 
 						add_action('fppdfe_notices', array("FPPDF_InstallUpdater", "fp_pdf_font_err")); 	
 						return false;
@@ -293,7 +279,7 @@ class FPPDF_InstallUpdater
 	public function fp_pdf_font_err()
 	{
 		echo '<div class="fppdfe_message error"><p>';
-		echo 'There was a problem installing the font files. Manually copy your fonts to the mPDF/ttfonts/ folder.';
+		echo 'There was a problem installing the font files. Manually copy your fonts to vendor/mpdf/mpdf/ttfonts/.';
 		echo '</p></div>';
 	}	
 	
@@ -385,7 +371,7 @@ class FPPDF_InstallUpdater
 	public static function fp_pdf_unzip_mpdf_err()
 	{
 			echo '<div class="fppdfe_message error"><p>';
-			echo 'Could not unzip mPDF.zip (located in the plugin folder). Unzip the file manually, place the extracted mPDF folder in the plugin folder and run the initialisation again.';
+			echo 'The modern mPDF runtime was not found in vendor/mpdf/mpdf/. Reinstall plugin dependencies and run the initialisation again.';
 			echo '</p></div>';		
 	}
 	

@@ -5,7 +5,7 @@ class FPPDF_Entry {
 	private static $frmplus_action_added = false;
 	
     public static function show_entry($atts){
-        extract(shortcode_atts(array(
+        $atts = shortcode_atts(array(
             'id' => false, 
 			'fields' => false, 
 			'plain_text' => false,
@@ -16,7 +16,18 @@ class FPPDF_Entry {
             'form_id' => false,
 			'hidden' => false,
 			'type' => false /* either false or empty (two column table), block (divs), or array ($form_data array) */
-        ), $atts));
+        ), $atts);
+
+		$id            = $atts['id'];
+		$fields        = $atts['fields'];
+		$plain_text    = $atts['plain_text'];
+		$user_info     = $atts['user_info'];
+		$include_blank = $atts['include_blank'];
+		$show_html     = $atts['show_html'];
+		$conditional   = $atts['conditional'];
+		$form_id       = $atts['form_id'];
+		$hidden        = $atts['hidden'];
+		$type          = $atts['type'];
         
         global $frmpro_settings, $frm_entry;
         
@@ -555,7 +566,8 @@ class FPPDF_Entry {
 			$tick  = apply_filters( 'frmplus_pdf_tick', '<img alt="Yes" width="16" src="'.FP_PDF_PLUGIN_DIR.'images/tick.png" />' );
 			$cross = apply_filters( 'frmplus_pdf_cross', '<img alt="No" width="16" src="'.FP_PDF_PLUGIN_DIR.'images/cross.png" />' );
 		}
-		extract( $data );
+		$value   = isset( $data['value'] ) ? $data['value'] : '';
+		$options = isset( $data['options'] ) ? (array) $data['options'] : array();
 		if ( empty( $options['options'] ) ){
 			// There are no options for this cell, which means it is either on or off
 			// Display $tick or $cross accordingly
